@@ -156,7 +156,6 @@ for iter in range(1, n_iters_validate + 1):
 
     # Tracking losses
     loss = criterion(output, usefulness_tensor)
-    loss.backward()
     loss = loss.item()
 
     current_loss += loss
