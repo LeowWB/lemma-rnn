@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 import os
 import pdb
 import string
@@ -123,12 +124,15 @@ if not os.path.exists(os.path.dirname(filename)):
 
 torch.save(lstm.state_dict(), filename)
 
-print('All Losses:')
+print('All Losses training:')
 print(all_losses)
+
+plt.plot(all_losses)
+plt.show()
 
 #################################### Validation ####################################
 
-n_iters_validate = len(problemslemmas_validation)
+n_iters_validate = 1000 # len(problemslemmas_validation)
 print_every_validate = 10
 print_every_correct = 0
 total_correct = 0
@@ -150,6 +154,14 @@ for iter in range(1, n_iters_validate + 1):
         print_every_correct += 1
         total_correct += 1
 
+    # Tracking losses
+    loss = criterion(output, usefulness_tensor)
+    loss.backward()
+    loss = loss.item()
+
+    current_loss += loss
+    total_loss += loss
+
     # Sanity check that everything is still running
     sys.stdout.write('#')
     sys.stdout.flush()
@@ -157,7 +169,12 @@ for iter in range(1, n_iters_validate + 1):
     # Print iter number, and number correctly classified
     if iter % print_every_validate == 0:
         print('\nIteration: %d \tProgress: %d%% \t(%s)' % (iter, iter / n_iters_validate * 100, timeSince(start_validate)))
+        print('Loss: %.4f \tTarget: %s \tOutput: %s' % (loss, usefulness_tensor.data[0][0], output.data[0][0]))
+        print('Average Loss (total): %.4f' % (total_loss / iter))
         print('Validation: %d/%d (%d%%)' % (print_every_correct, print_every_validate, print_every_correct*100/print_every_validate))
         print_every_correct = 0
 
 print('Final Validation Results: %d/%d (%d%%)' % (total_correct, n_iters_validate, total_correct*100/n_iters_validate))
+
+print('All Losses validation:')
+print(all_losses)
